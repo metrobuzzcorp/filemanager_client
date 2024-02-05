@@ -37,7 +37,8 @@ export const RegisterForm = () => {
       router.push("/login");
     },
     onError(error) {
-      toast.error("Unable to register");
+      console.log(error);
+      toast.error(error.data.message);
     },
   });
 

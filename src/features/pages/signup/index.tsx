@@ -4,9 +4,9 @@ import { RegisterForm } from "./registerForm";
 export const Signup = () => {
   return (
     <div className="flex flex-wrap h-screen">
-      <div className="w-5/12 bg-gray-100 flex flex-col items-center pt-16 relative">
+      <div className="lg:w-5/12 w-full bg-gray-100 flex flex-col items-center pt-16 relative">
         <div className="flex flex-col items-center w-8/12">
-          <h1 className="text-5xl font-black text-neutral-700">
+          <h1 className="text-center text-5xl font-black text-neutral-700">
             Welcome back!
           </h1>
           <p className="font-normal text-center text-neutral-600 mt-5">
