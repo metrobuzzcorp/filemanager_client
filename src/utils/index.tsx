@@ -9,3 +9,7 @@ export const routeCreator = (
 export const endpointBuilder = (endpointStrings: string[]) => {
   return endpointStrings.join("");
 };
+
+export const isError = (error: unknown): error is Error => {
+  return error instanceof Error;
+};

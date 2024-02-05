@@ -9,7 +9,16 @@ import {
   userApiReducerPath,
 } from "./apis";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { persistReducer, persistStore } from "redux-persist";
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+  persistReducer,
+  persistStore,
+} from "redux-persist";
 import thunk from "redux-thunk";
 import storage from "redux-persist/lib/storage";
 
@@ -36,7 +45,11 @@ const storeGenerator = () => {
     store = configureStore({
       reducer: persistedReducer,
       middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(userApiMiddleware, entityApiMiddleware),
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          },
+        }).concat(userApiMiddleware, entityApiMiddleware),
     });
 
     const persistor = persistStore(store);
@@ -47,7 +60,11 @@ const storeGenerator = () => {
   store = configureStore({
     reducer: combinedReducers,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(userApiMiddleware, entityApiMiddleware),
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
+      }).concat(userApiMiddleware, entityApiMiddleware),
   });
 
   const persistor = persistStore(store);

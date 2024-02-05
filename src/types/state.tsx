@@ -1,5 +1,5 @@
 export type User = {
-  email: string;
+  emailAddress: string;
   token: string;
   createdAt: string;
   updatedAt: string;
