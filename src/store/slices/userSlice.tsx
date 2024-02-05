@@ -3,7 +3,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 const initialState: UserSlice = {
   user: {
-    email: "",
+    emailAddress: "",
     token: "",
     createdAt: "",
     id: "",
