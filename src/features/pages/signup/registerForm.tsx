@@ -1,6 +1,7 @@
 import { Button, Input } from "@/components";
 import { useRegisterUserMutation } from "@/store/apis";
 import { RegisterUserRequest, RegisterUserResponse } from "@/types";
+import { isError } from "@/utils";
 import { useFetcher } from "netwrap";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -38,7 +39,13 @@ export const RegisterForm = () => {
     },
     onError(error) {
       console.log(error);
-      toast.error(error.data.message);
+      if (isError(error)) {
+        return toast.error(error.message);
+      }
+
+      const _error = error as { data: RegisterUserResponse };
+
+      return toast.error(_error.data.message);
     },
   });
 
