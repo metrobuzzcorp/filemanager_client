@@ -51,7 +51,7 @@ export const Header = () => {
   }, [id, router]);
 
   return (
-    <div className="border-b w-full lg:px-10 px-5 py-3 flex justify-between items-center">
+    <div className="border-b w-full lg:px-10 px-5 h-[70px] flex justify-between items-center">
       <div className="flex-auto">
         <p className="text-4xl font-black">fm</p>
       </div>
