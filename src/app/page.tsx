@@ -8,7 +8,7 @@ export default function Home() {
   const { id } = useAppSelector((state) => state.userReducer.user);
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-200">
+    <div className="min-h-screen flex flex-col bg-neutral-100">
       <Header />
       {id ? <Pages.Dashboard /> : <Pages.Home />}
     </div>

@@ -5,7 +5,7 @@ export const Home = () => {
   const router = useRouter();
   return (
     <div className="flex-auto flex">
-      <div className="w-6/12 flex-col flex-auto flex justify-center px-10">
+      <div className="lg:w-6/12 w-full flex-col flex-auto flex justify-center px-10">
         <h1 className="text-7xl font-light">
           <span className="font-bold">Organize, access</span> and{" "}
           <span className="font-bold">share your files</span> with <br />
@@ -20,7 +20,7 @@ export const Home = () => {
           Try now!
         </Button>
       </div>
-      <div className="w-6/12"></div>
+      <div className="lg:w-6/12 hidden lg:flex"></div>
     </div>
   );
 };
