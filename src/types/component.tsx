@@ -1,4 +1,6 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
+import { Controller } from "./general";
+import { Entity } from "./api";
 
 export type DefaultInputProps = DetailedHTMLProps<
   InputHTMLAttributes<HTMLInputElement>,
@@ -15,4 +17,8 @@ export type InputProps = {
 
 export type TopbarProps = {
   getSearchInput: (text: string) => void;
+};
+
+export type EntityProps = {
+  entity: Entity;
 };

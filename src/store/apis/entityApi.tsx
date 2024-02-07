@@ -17,10 +17,36 @@ import {
 } from "@/types";
 import { endpointBuilder } from "@/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { RootState, store } from "../";
+import { clearUserData } from "../slices";
 
 export const entityApi = createApi({
   reducerPath: "entityApi",
-  baseQuery: fetchBaseQuery({ baseUrl: config.baseUrl }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: config.baseUrl,
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as RootState).userReducer.user.token;
+
+      // If we have a token set in state, let's assume that we should be passing it.
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      headers.set("content-type", "application/json");
+
+      return headers;
+    },
+    validateStatus(response) {
+      if (response.status >= 200 && response.status < 300) return true;
+
+      if (response.status === 401) {
+        store.dispatch(clearUserData());
+        return false;
+      }
+
+      return false;
+    },
+  }),
   endpoints: (builder) => ({
     getRootFolderDetails: builder.query<
       GetRootFolderDetailsResponse,

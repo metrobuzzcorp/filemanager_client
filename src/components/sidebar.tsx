@@ -70,8 +70,8 @@ export const Sidebar = () => {
             <div
               className={`flex  gap-2 items-center w-fit  pr-10 py-1 rounded-full ${
                 singleOption.value === currentActiveTab
-                  ? "bg-green-600 text-white pl-2 hover:bg-green-900"
-                  : "border-neutral-200 text-neutral-500 hover:text-green-600 hover:bg-green-50"
+                  ? "bg-emerald-600 text-white pl-2 hover:bg-emerald-900"
+                  : "border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 hover:pl-2"
               }`}
             >
               {singleOption.icon}
