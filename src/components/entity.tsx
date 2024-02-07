@@ -6,7 +6,6 @@ export const EntityListItem = ({ entity }: EntityProps) => {
 };
 
 export const EntityCardItem = ({ entity }: EntityProps) => {
-  console.log({ entity });
   return (
     <div className="flex items-center gap-2 px-5 bg-neutral-100 w-full py-2 rounded-lg cursor-pointer">
       {entity.type === "file" && <IconFile />}
