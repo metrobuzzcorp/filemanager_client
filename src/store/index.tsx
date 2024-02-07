@@ -1,5 +1,5 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { userReducer } from "./slices";
+import { userReducer, entityReducer } from "./slices";
 import {
   entityApiMiddleware,
   entityApiReducer,
@@ -19,7 +19,6 @@ import {
   persistReducer,
   persistStore,
 } from "redux-persist";
-import thunk from "redux-thunk";
 import storage from "redux-persist/lib/storage";
 
 const storeGenerator = () => {
@@ -27,6 +26,7 @@ const storeGenerator = () => {
 
   const combinedReducers = combineReducers({
     userReducer,
+    entityReducer,
     [userApiReducerPath]: userApiReducer,
     [entityApiReducerPath]: entityApiReducer,
   });
@@ -79,3 +79,6 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 setupListeners(store.dispatch);
+
+export * from "./apis";
+export * from "./hooks";

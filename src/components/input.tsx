@@ -1,23 +1,7 @@
+import { DefaultInputProps, InputProps } from "@/types";
 import React, { LegacyRef } from "react";
-import {
-  DetailedHTMLProps,
-  HTMLInputTypeAttribute,
-  InputHTMLAttributes,
-} from "react";
+import { HTMLInputTypeAttribute } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-
-type DefaultInputProps = DetailedHTMLProps<
-  InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->;
-
-type InputProps = {
-  label?: string;
-  onTogglePassword?: () => void;
-  showPassword?: boolean;
-  isPasswordInput?: boolean;
-  ref?: React.Ref<HTMLInputElement> | undefined;
-} & DefaultInputProps;
 
 const baseStyles =
   "w-full outline-none hover:shadow-lg bg-transparent border border-neutral-300 rounded-full py-3 px-5";
