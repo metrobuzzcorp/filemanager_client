@@ -23,8 +23,9 @@ const BaseButton = ({
   ...rest
 }: BaseButtonProps) => {
   const variantClasses = {
-    default: "bg-emerald-600 text-white",
-    outline: "hover:bg-emerald-900 border border-emerald-600 text-emerald-600",
+    default: "hover:bg-emerald-900 bg-emerald-600 text-white",
+    outline:
+      "hover:bg-emerald-600 hover:text-white border border-emerald-600 text-emerald-600",
   };
 
   const widthClasses = {

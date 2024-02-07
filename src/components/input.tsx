@@ -16,7 +16,7 @@ type InputProps = {
   onTogglePassword?: () => void;
   showPassword?: boolean;
   isPasswordInput?: boolean;
-  ref?: LegacyRef<HTMLInputElement> | undefined;
+  ref?: React.Ref<HTMLInputElement> | undefined;
 } & DefaultInputProps;
 
 const baseStyles =
@@ -61,13 +61,15 @@ export const Input = ({
 
 const BaseInput = React.memo(
   React.forwardRef(
-    ({
-      type,
-      className,
-      isPasswordInput,
-      ref,
-      ...rest
-    }: DefaultInputProps & { isPasswordInput?: boolean }) => {
+    (
+      {
+        type,
+        className,
+        isPasswordInput,
+        ...rest
+      }: DefaultInputProps & { isPasswordInput?: boolean },
+      ref: LegacyRef<HTMLInputElement> | undefined
+    ) => {
       const classes: Record<HTMLInputTypeAttribute, string> = {
         text: isPasswordInput
           ? "w-full bg-transparent outline-none"

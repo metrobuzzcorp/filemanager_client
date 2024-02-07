@@ -38,7 +38,6 @@ export const RegisterForm = () => {
       router.push("/login");
     },
     onError(error) {
-      console.log(error);
       if (isError(error)) {
         return toast.error(error.message);
       }
