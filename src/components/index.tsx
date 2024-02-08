@@ -5,3 +5,4 @@ export * from "./sidebar";
 export * from "./topbar";
 export * from "./entity";
 export * from "./loadingProgressBar";
+export * from "./generateNameAvatar";

@@ -39,7 +39,9 @@ export const Topbar = ({ getSearchInput }: TopbarProps) => {
   return (
     <div className="flex flex-wrap items-center justify-between border-neutral-100 border-b pb-0 pt-5 lg:py-5 px-5">
       <div className="flex gap-12 items-center w-full lg:w-6/12">
-        <h1 className="text-2xl">{normalCaseGenerator(currentActiveTab)}</h1>
+        <h1 className="text-xl text-neutral-500">
+          {normalCaseGenerator(currentActiveTab)}
+        </h1>
         <div className="flex-auto">
           {SearchComponent?.({
             placeholder: "Search...",

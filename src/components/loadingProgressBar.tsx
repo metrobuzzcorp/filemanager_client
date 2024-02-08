@@ -13,8 +13,6 @@ export const LoadingProgressBar = ({
     return (251.2 - (progressPercentage * 251.2) / 100).toString();
   }, [progressPercentage]);
 
-  console.log({ percentageLoaded, progressPercentage });
-
   return (
     <>
       <svg

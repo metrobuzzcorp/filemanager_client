@@ -40,6 +40,7 @@ export type Entity = {
   cloudinaryFormat: string | null;
   cloudinaryFileName: string | null;
   fileType: "image" | "video" | null;
+  fileSize: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 };

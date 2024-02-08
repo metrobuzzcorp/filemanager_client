@@ -13,7 +13,9 @@ export const EntityCardItem = ({ entity }: EntityProps) => {
       {entity.type === "folder" && (
         <IconFolderFilled className="text-emerald-600" />
       )}
-      <p>{truncateText(entity.name as string, 25)}</p>
+      <p className="text-neutral-700">
+        {truncateText(entity.name as string, 25)}
+      </p>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import {
   EntityCardItem,
   EntityListItem,
+  GenerateNameAvatar,
   LoadingProgressBar,
   Topbar,
 } from "@/components";
@@ -19,10 +20,18 @@ import {
 import { log, useFetcher } from "netwrap";
 import { DragEvent, useEffect, useState } from "react";
 import axios from "axios";
-import { endpointBuilder } from "@/utils";
+import { bytesToMB, endpointBuilder } from "@/utils";
 import { config } from "@/config";
 import { toast } from "react-toastify";
-import { IconFile, IconPlus, IconWorldCancel } from "@tabler/icons-react";
+import {
+  IconDots,
+  IconFile,
+  IconFolderFilled,
+  IconPlus,
+  IconWorldCancel,
+} from "@tabler/icons-react";
+import { truncateText } from "text-shortener";
+import moment from "moment";
 
 export const Home = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -41,6 +50,7 @@ export const Home = () => {
     content: [],
     createdAt: "",
     fileType: "image",
+    fileSize: "",
     id: "",
     name: "",
     owner: {
@@ -72,7 +82,7 @@ export const Home = () => {
       setCurrentFolderId(data.payload.id as string);
     },
     onError(error) {
-      log({ error });
+      // log({ error });
     },
     onFinal() {},
   });
@@ -115,7 +125,7 @@ export const Home = () => {
   };
 
   const [isUploading, setIsUploading] = useState(false);
-
+  const [uploadStarted, setUploadStarted] = useState(false);
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -129,7 +139,7 @@ export const Home = () => {
       formData.append("ownerId", id);
 
       setUploadFileName(file.name);
-
+      setUploadStarted(true);
       setIsUploading(true);
 
       const url = endpointBuilder([
@@ -149,8 +159,6 @@ export const Home = () => {
             (progressEvent.loaded * 100) / totalProgress
           );
 
-          console.log(progressEvent);
-
           setUploadProgress(progressPercentage);
         },
 
@@ -164,6 +172,7 @@ export const Home = () => {
       toast.success(`Successfully uploaded file - ${file.name}`);
     } catch (error) {
     } finally {
+      setUploadStarted(false);
     }
   };
 
@@ -171,7 +180,6 @@ export const Home = () => {
     event.preventDefault();
     setIsDragging(false);
     const files = event.dataTransfer.files;
-    console.log(files);
 
     if (files.length > 1) {
       return toast.error("You are only allowed to upload 1 file at a time");
@@ -207,12 +215,20 @@ export const Home = () => {
           <>
             {listType === "card" && (
               <GridStyle
+                entities={entity.content.filter((_) =>
+                  _.name?.toLowerCase().includes(searchInput.toLowerCase())
+                )}
+                setCurrentFolderId={setCurrentFolderId}
+                setCurrentFileId={setCurrentFileId}
+              />
+            )}
+            {listType === "list" && (
+              <ListStyle
                 entities={entity.content}
                 setCurrentFolderId={setCurrentFolderId}
                 setCurrentFileId={setCurrentFileId}
               />
             )}
-            {listType === "list" && <ListStyle entities={entity.content} />}
           </>
         ) : (
           <p>
@@ -225,11 +241,20 @@ export const Home = () => {
       {isUploading && (
         <div className="absolute bottom-5 w-[300px] right-5 bg-white shadow-xl rounded-lg ">
           <div className="border-b flex justify-between border-neutral-100 px-4 py-1">
-            <p className="text-sm">Uploading...</p>
+            <p className="text-sm">
+              {uploadStarted ? "Uploading..." : "Uploaded"}
+            </p>
             <IconPlus
               onClick={() => {
-                controller.abort();
-                setIsUploading(false);
+                if (!uploadStarted) {
+                  controller.abort();
+                  setIsUploading(false);
+                  return setUploadStarted(false);
+                }
+
+                toast.error("Finalizing upload. Kindly be patient...", {
+                  isLoading: uploadStarted,
+                });
               }}
               size={18}
               className="rotate-45 cursor-pointer"
@@ -250,8 +275,65 @@ export const Home = () => {
   );
 };
 
-const ListStyle = ({ entities }: { entities: Entity[] }) => {
-  return <div className="w-full bg-red-600">Hello</div>;
+const ListStyle = ({
+  entities,
+  setCurrentFolderId,
+  setCurrentFileId,
+}: {
+  entities: Entity[];
+  setCurrentFolderId: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentFileId: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+  return (
+    <div className="w-full">
+      <table className="border-collapse table-auto w-full text-sm">
+        <thead className="items-center w-full justify-center text-neutral-500 font-bold text-left">
+          <th className="border-b border-slate-100 w-6/12 pb-3">Name</th>
+          <th className="border-b border-slate-100 w-1/12 pb-3">Owner</th>
+          <th className="border-b border-slate-100 w-2/12 pb-3">
+            Last Modified
+          </th>
+          <th className="border-b border-slate-100 w-2/12 pb-3">File Size</th>
+          <th className="border-b border-slate-100 w-1/12 pb-3">
+            <IconDots />
+          </th>
+        </thead>
+        <tbody className="">
+          {entities
+            .filter((_) => _.type === "folder")
+            .concat(...entities.filter((_) => _.type === "file"))
+            .map((entity, index) => {
+              return (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="flex gap-2 py-3 items-center px-2 cursor-pointer">
+                    {entity.type === "file" && <IconFile />}
+                    {entity.type === "folder" && (
+                      <IconFolderFilled className="text-emerald-600" />
+                    )}
+                    {truncateText(entity.name as string, 50)}
+                  </td>
+                  <td className="py-3">
+                    <GenerateNameAvatar
+                      email={entity.owner?.emailAddress as string}
+                    />
+                  </td>
+                  <td>
+                    {moment(entity.updatedAt as string, "").format(
+                      "MMM Do, YYYY"
+                    )}
+                  </td>
+                  <td>
+                    {entity.type === "file"
+                      ? `${bytesToMB(parseFloat(entity.fileSize as string))}mb`
+                      : "----"}
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 const GridStyle = ({
@@ -267,43 +349,55 @@ const GridStyle = ({
     <div>
       <p className="font-bold text-sm text-neutral-500">Folders</p>
       <div className="w-full mt-3 flex flex-wrap justify-between">
-        {entities
-          .filter((_) => _.type === "folder")
-          .map((singleEntity, index) => {
-            return (
-              <div
-                key={index}
-                className={`lg:w-[24%] mb-5`}
-                onClick={() =>
-                  singleEntity.type === "folder"
-                    ? setCurrentFolderId(singleEntity.id as string)
-                    : setCurrentFileId(singleEntity.id as string)
-                }
-              >
-                <EntityCardItem entity={singleEntity} />
-              </div>
-            );
-          })}
+        {entities.filter((_) => _.type === "folder").length > 0 ? (
+          <>
+            {entities
+              .filter((_) => _.type === "folder")
+              .map((singleEntity, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`lg:w-[24%] mb-5`}
+                    onClick={() =>
+                      singleEntity.type === "folder"
+                        ? setCurrentFolderId(singleEntity.id as string)
+                        : setCurrentFileId(singleEntity.id as string)
+                    }
+                  >
+                    <EntityCardItem entity={singleEntity} />
+                  </div>
+                );
+              })}
+          </>
+        ) : (
+          <p className="text-neutral-500 mb-5">Currently no folders to show!</p>
+        )}
       </div>
       <p className="font-bold text-sm text-neutral-500">Files</p>
       <div className="w-full mt-3 flex flex-wrap justify-between">
-        {entities
-          .filter((_) => _.type === "file")
-          .map((singleEntity, index) => {
-            return (
-              <div
-                key={index}
-                className={`lg:w-[24%] mb-5`}
-                onClick={() =>
-                  singleEntity.type === "folder"
-                    ? setCurrentFolderId(singleEntity.id as string)
-                    : setCurrentFileId(singleEntity.id as string)
-                }
-              >
-                <EntityCardItem entity={singleEntity} />
-              </div>
-            );
-          })}
+        {entities.filter((_) => _.type === "file").length > 0 ? (
+          <>
+            {entities
+              .filter((_) => _.type === "file")
+              .map((singleEntity, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`lg:w-[24%] mb-5`}
+                    onClick={() =>
+                      singleEntity.type === "folder"
+                        ? setCurrentFolderId(singleEntity.id as string)
+                        : setCurrentFileId(singleEntity.id as string)
+                    }
+                  >
+                    <EntityCardItem entity={singleEntity} />
+                  </div>
+                );
+              })}
+          </>
+        ) : (
+          <p className="text-neutral-500 mb-5">Currently no files to show!</p>
+        )}
       </div>
     </div>
   );
