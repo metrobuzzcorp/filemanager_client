@@ -264,22 +264,47 @@ const GridStyle = ({
   setCurrentFileId: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   return (
-    <div className="w-full flex flex-wrap justify-between">
-      {entities.map((singleEntity, index) => {
-        return (
-          <div
-            key={index}
-            className={`lg:w-[24%] mb-5`}
-            onClick={() =>
-              singleEntity.type === "folder"
-                ? setCurrentFolderId(singleEntity.id as string)
-                : setCurrentFileId(singleEntity.id as string)
-            }
-          >
-            <EntityCardItem entity={singleEntity} />
-          </div>
-        );
-      })}
+    <div>
+      <p className="font-bold text-sm text-neutral-500">Folders</p>
+      <div className="w-full mt-3 flex flex-wrap justify-between">
+        {entities
+          .filter((_) => _.type === "folder")
+          .map((singleEntity, index) => {
+            return (
+              <div
+                key={index}
+                className={`lg:w-[24%] mb-5`}
+                onClick={() =>
+                  singleEntity.type === "folder"
+                    ? setCurrentFolderId(singleEntity.id as string)
+                    : setCurrentFileId(singleEntity.id as string)
+                }
+              >
+                <EntityCardItem entity={singleEntity} />
+              </div>
+            );
+          })}
+      </div>
+      <p className="font-bold text-sm text-neutral-500">Files</p>
+      <div className="w-full mt-3 flex flex-wrap justify-between">
+        {entities
+          .filter((_) => _.type === "file")
+          .map((singleEntity, index) => {
+            return (
+              <div
+                key={index}
+                className={`lg:w-[24%] mb-5`}
+                onClick={() =>
+                  singleEntity.type === "folder"
+                    ? setCurrentFolderId(singleEntity.id as string)
+                    : setCurrentFileId(singleEntity.id as string)
+                }
+              >
+                <EntityCardItem entity={singleEntity} />
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 };

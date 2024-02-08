@@ -1,4 +1,6 @@
 import { Input } from "@/components";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { updateListType } from "@/store/slices";
 import { ActiveTab, InputProps, TopbarProps } from "@/types";
 import { IconGrid3x3, IconList } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
@@ -30,6 +32,10 @@ export const Topbar = ({ getSearchInput }: TopbarProps) => {
 
   const [searchInput, setSearchInput] = useState("");
 
+  const { listType } = useAppSelector((state) => state.entityReducer);
+
+  const dispatch = useAppDispatch();
+
   return (
     <div className="flex flex-wrap items-center justify-between border-neutral-100 border-b pb-0 pt-5 lg:py-5 px-5">
       <div className="flex gap-12 items-center w-full lg:w-6/12">
@@ -47,8 +53,26 @@ export const Topbar = ({ getSearchInput }: TopbarProps) => {
         </div>
       </div>
       <div className="flex gap-4 items-center w-full lg:w-6/12 lg:justify-end justify-center py-5 lg:py-0">
-        <IconGrid3x3 />
-        <IconList />
+        <div
+          className={`cursor-pointer ${
+            listType === "card"
+              ? "p-2 rounded-lg bg-emerald-600 text-white"
+              : undefined
+          }`}
+          onClick={() => dispatch(updateListType("card"))}
+        >
+          <IconGrid3x3 size={16} />
+        </div>
+        <div
+          className={`cursor-pointer ${
+            listType === "list"
+              ? "bg-emerald-600 p-2 rounded-lg text-white"
+              : undefined
+          }`}
+          onClick={() => dispatch(updateListType("list"))}
+        >
+          <IconList size={16} />
+        </div>
       </div>
     </div>
   );
