@@ -224,7 +224,9 @@ export const Home = () => {
             )}
             {listType === "list" && (
               <ListStyle
-                entities={entity.content}
+                entities={entity.content.filter((_) =>
+                  _.name?.toLowerCase().includes(searchInput.toLowerCase())
+                )}
                 setCurrentFolderId={setCurrentFolderId}
                 setCurrentFileId={setCurrentFileId}
               />
@@ -288,15 +290,17 @@ const ListStyle = ({
     <div className="w-full">
       <table className="border-collapse table-auto w-full text-sm">
         <thead className="items-center w-full justify-center text-neutral-500 font-bold text-left">
-          <th className="border-b border-slate-100 w-6/12 pb-3">Name</th>
-          <th className="border-b border-slate-100 w-1/12 pb-3">Owner</th>
-          <th className="border-b border-slate-100 w-2/12 pb-3">
-            Last Modified
-          </th>
-          <th className="border-b border-slate-100 w-2/12 pb-3">File Size</th>
-          <th className="border-b border-slate-100 w-1/12 pb-3">
-            <IconDots />
-          </th>
+          <tr>
+            <th className="border-b border-slate-100 w-6/12 pb-3">Name</th>
+            <th className="border-b border-slate-100 w-1/12 pb-3">Owner</th>
+            <th className="border-b border-slate-100 w-2/12 pb-3">
+              Last Modified
+            </th>
+            <th className="border-b border-slate-100 w-2/12 pb-3">File Size</th>
+            <th className="border-b border-slate-100 w-1/12 pb-3">
+              <IconDots />
+            </th>
+          </tr>
         </thead>
         <tbody className="">
           {entities

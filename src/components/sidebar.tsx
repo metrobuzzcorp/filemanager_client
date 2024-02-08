@@ -1,3 +1,5 @@
+import { useAppDispatch } from "@/store";
+import { clearUserData } from "@/store/slices";
 import { ActiveTab } from "@/types";
 import {
   IconCalendarTime,
@@ -6,6 +8,7 @@ import {
   IconHeart,
   IconHearts,
   IconHome2,
+  IconLogout,
   IconSmartHome,
   IconTimeDuration0,
   IconTrash,
@@ -62,8 +65,10 @@ export const Sidebar = () => {
     [currentActiveTab]
   );
 
+  const dispatch = useAppDispatch();
+
   return (
-    <div className="px-10 pt-10 flex-col flex gap-5">
+    <div className="px-10 pt-10 flex-col flex gap-5 relative">
       {options.map((singleOption, index) => {
         return (
           <Link href={`?activeTab=${singleOption.value}`} passHref key={index}>
@@ -80,6 +85,13 @@ export const Sidebar = () => {
           </Link>
         );
       })}
+      <div
+        onClick={() => dispatch(clearUserData())}
+        className={`flex gap-2 items-center w-fit pr-10 py-1 rounded-full  border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 hover:pl-2 cursor-pointer`}
+      >
+        <IconLogout />
+        <p>Logout</p>
+      </div>
     </div>
   );
 };
