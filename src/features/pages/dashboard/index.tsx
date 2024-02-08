@@ -1,5 +1,5 @@
 import { Sidebar } from "@/components";
-import { Bin, Home, Recent, Starred, Storage } from "./components";
+import { Bin, Home, Recent, Starred, Storage } from "./sections";
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ActiveTab } from "@/types";

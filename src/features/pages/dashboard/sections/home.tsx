@@ -1,37 +1,20 @@
+import { EntityCardItem, LoadingProgressBar, Topbar } from "@/components";
+import { useAppSelector, useLazyGetRootFolderDetailsQuery } from "@/store";
 import {
-  EntityCardItem,
-  EntityListItem,
-  GenerateNameAvatar,
-  LoadingProgressBar,
-  Topbar,
-} from "@/components";
-import {
-  useAppSelector,
-  useCreateFileMutation,
-  useLazyGetRootFolderDetailsQuery,
-} from "@/store";
-import {
-  CreateFileRequest,
   CreateFileResponse,
   Entity,
   GetRootFolderDetailsRequest,
   GetRootFolderDetailsResponse,
 } from "@/types";
-import { log, useFetcher } from "netwrap";
+import { useFetcher } from "netwrap";
 import { DragEvent, useEffect, useState } from "react";
 import axios from "axios";
-import { bytesToMB, endpointBuilder } from "@/utils";
+import { endpointBuilder } from "@/utils";
 import { config } from "@/config";
 import { toast } from "react-toastify";
-import {
-  IconDots,
-  IconFile,
-  IconFolderFilled,
-  IconPlus,
-  IconWorldCancel,
-} from "@tabler/icons-react";
-import { truncateText } from "text-shortener";
-import moment from "moment";
+import { IconFile, IconPlus } from "@tabler/icons-react";
+import { FileDetails } from "../components";
+import { ListStyle } from "../components";
 
 export const Home = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -95,18 +78,6 @@ export const Home = () => {
     }
   }, [id]);
 
-  const [createFileTrigger] = useCreateFileMutation();
-
-  const { isLoading: isCreatingFile, trigger: createFile } = useFetcher<
-    CreateFileRequest,
-    CreateFileResponse
-  >({
-    queryFn: (formData) => createFileTrigger(formData as FormData).unwrap(),
-    onSuccess(data) {},
-    onError(error) {},
-    onFinal() {},
-  });
-
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -165,8 +136,12 @@ export const Home = () => {
         signal: controller.signal,
       });
 
-      if (data.status) {
+      if (!data.status) {
         throw new Error(data.message);
+      }
+
+      if (currentFolderId === entity.id) {
+        setEntity({ ...entity, content: [...entity.content, data.payload] });
       }
 
       toast.success(`Successfully uploaded file - ${file.name}`);
@@ -200,46 +175,53 @@ export const Home = () => {
   };
 
   return (
-    <div
-      className={`relative rounded-lg flex-auto flex flex-col ${
-        isDragging ? "bg-gray-200" : "bg-white"
-      }`}
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <Topbar getSearchInput={(text) => setSearchInput(text)} />
-      <div className="overflow-auto overscroll-contain flex-auto py-5 px-5">
-        {entity.content && entity.content.length > 0 ? (
-          <>
-            {listType === "card" && (
-              <GridStyle
-                entities={entity.content.filter((_) =>
-                  _.name?.toLowerCase().includes(searchInput.toLowerCase())
-                )}
-                setCurrentFolderId={setCurrentFolderId}
-                setCurrentFileId={setCurrentFileId}
-              />
-            )}
-            {listType === "list" && (
-              <ListStyle
-                entities={entity.content.filter((_) =>
-                  _.name?.toLowerCase().includes(searchInput.toLowerCase())
-                )}
-                setCurrentFolderId={setCurrentFolderId}
-                setCurrentFileId={setCurrentFileId}
-              />
-            )}
-          </>
-        ) : (
-          <p>
-            There are no currently no files in your drive. Kindly add a file or
-            folder to view them here
-          </p>
-        )}
+    <div className="flex relative flex-auto gap-5">
+      <div
+        className={`relative rounded-lg flex-auto flex flex-col ${
+          isDragging ? "bg-gray-200" : "bg-white"
+        }`}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <Topbar getSearchInput={(text) => setSearchInput(text)} />
+        <div className="overflow-y-auto h-4 scrollbar:!w-1.5 scrollbar:!h-1.5 scrollbar-track:!bg-slate-100 scrollbar-thumb:!rounded scrollbar-thumb:!bg-slate-300 overscroll-contain flex-auto py-5 px-5">
+          {entity.content && entity.content.length > 0 ? (
+            <>
+              {listType === "card" && (
+                <GridStyle
+                  entities={entity.content.filter((_) =>
+                    _.name?.toLowerCase().includes(searchInput.toLowerCase())
+                  )}
+                  setCurrentFolderId={setCurrentFolderId}
+                  setCurrentFileId={setCurrentFileId}
+                />
+              )}
+              {listType === "list" && (
+                <ListStyle
+                  entities={entity.content.filter((_) =>
+                    _.name?.toLowerCase().includes(searchInput.toLowerCase())
+                  )}
+                  setCurrentFolderId={setCurrentFolderId}
+                  setCurrentFileId={setCurrentFileId}
+                />
+              )}
+            </>
+          ) : (
+            <p>
+              There are no currently no files in your drive. Kindly add a file
+              or folder to view them here
+            </p>
+          )}
+        </div>
       </div>
-
+      {currentFileId && (
+        <FileDetails
+          closeComponent={() => setCurrentFileId("")}
+          fileId={currentFileId}
+        />
+      )}
       {isUploading && (
         <div className="absolute bottom-5 w-[300px] right-5 bg-white shadow-xl rounded-lg ">
           <div className="border-b flex justify-between border-neutral-100 px-4 py-1">
@@ -273,69 +255,6 @@ export const Home = () => {
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-const ListStyle = ({
-  entities,
-  setCurrentFolderId,
-  setCurrentFileId,
-}: {
-  entities: Entity[];
-  setCurrentFolderId: React.Dispatch<React.SetStateAction<string>>;
-  setCurrentFileId: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-  return (
-    <div className="w-full">
-      <table className="border-collapse table-auto w-full text-sm">
-        <thead className="items-center w-full justify-center text-neutral-500 font-bold text-left">
-          <tr>
-            <th className="border-b border-slate-100 w-6/12 pb-3">Name</th>
-            <th className="border-b border-slate-100 w-1/12 pb-3">Owner</th>
-            <th className="border-b border-slate-100 w-2/12 pb-3">
-              Last Modified
-            </th>
-            <th className="border-b border-slate-100 w-2/12 pb-3">File Size</th>
-            <th className="border-b border-slate-100 w-1/12 pb-3">
-              <IconDots />
-            </th>
-          </tr>
-        </thead>
-        <tbody className="">
-          {entities
-            .filter((_) => _.type === "folder")
-            .concat(...entities.filter((_) => _.type === "file"))
-            .map((entity, index) => {
-              return (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="flex gap-2 py-3 items-center px-2 cursor-pointer">
-                    {entity.type === "file" && <IconFile />}
-                    {entity.type === "folder" && (
-                      <IconFolderFilled className="text-emerald-600" />
-                    )}
-                    {truncateText(entity.name as string, 50)}
-                  </td>
-                  <td className="py-3">
-                    <GenerateNameAvatar
-                      email={entity.owner?.emailAddress as string}
-                    />
-                  </td>
-                  <td>
-                    {moment(entity.updatedAt as string, "").format(
-                      "MMM Do, YYYY"
-                    )}
-                  </td>
-                  <td>
-                    {entity.type === "file"
-                      ? `${bytesToMB(parseFloat(entity.fileSize as string))}mb`
-                      : "----"}
-                  </td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
     </div>
   );
 };

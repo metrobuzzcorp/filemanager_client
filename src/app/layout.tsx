@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={nunito.className}>
+      <body className={`overflow-hidden ${nunito.className}`}>
         <ToastContainer
           position="top-right"
           autoClose={5000}
