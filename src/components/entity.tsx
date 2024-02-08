@@ -1,5 +1,6 @@
 import { EntityProps } from "@/types";
 import { IconFile, IconFolder, IconFolderFilled } from "@tabler/icons-react";
+import { truncateText } from "text-shortener";
 
 export const EntityListItem = ({ entity }: EntityProps) => {
   return <div className="flex"></div>;
@@ -12,7 +13,7 @@ export const EntityCardItem = ({ entity }: EntityProps) => {
       {entity.type === "folder" && (
         <IconFolderFilled className="text-emerald-600" />
       )}
-      <p>{entity.name}</p>
+      <p>{truncateText(entity.name as string, 25)}</p>
     </div>
   );
 };

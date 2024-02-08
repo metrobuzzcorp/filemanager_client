@@ -28,7 +28,7 @@ export const Home = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const {
-    user: { id },
+    user: { id, token },
   } = useAppSelector((state) => state.userReducer);
 
   const { listType } = useAppSelector((state) => state.entityReducer);
@@ -139,11 +139,17 @@ export const Home = () => {
       ]);
 
       const { data } = await axios.post<CreateFileResponse>(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
         onUploadProgress(progressEvent) {
           const totalProgress = progressEvent.total as number;
           const progressPercentage = Math.round(
             (progressEvent.loaded * 100) / totalProgress
           );
+
+          console.log(progressEvent);
 
           setUploadProgress(progressPercentage);
         },
@@ -167,9 +173,22 @@ export const Home = () => {
     const files = event.dataTransfer.files;
     console.log(files);
 
-    for (let index = 0; index < files.length; index++) {
-      uploadFile(files[index]);
+    if (files.length > 1) {
+      return toast.error("You are only allowed to upload 1 file at a time");
     }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "video/mp4",
+      "video/quicktime",
+    ]; // Add more video types if necessary
+
+    if (!allowedTypes.includes(files[0].type)) {
+      return toast.error("Please upload only image or video files.");
+    }
+
+    uploadFile(files[0]);
   };
 
   return (
@@ -203,28 +222,30 @@ export const Home = () => {
         )}
       </div>
 
-      <div className="absolute bottom-5 w-[300px] right-5 bg-white shadow-xl rounded-lg ">
-        <div className="border-b flex justify-between border-neutral-100 px-4 py-1">
-          <p className="text-sm">Uploading...</p>
-          <IconPlus
-            onClick={() => {
-              controller.abort();
-              setIsUploading(false);
-            }}
-            size={18}
-            className="rotate-45 cursor-pointer"
-          />
-        </div>
-        <div className="flex justify-between items-center p-3">
-          <div className="flex gap-1 mr-10">
-            <IconFile />
-            {uploadFileName}
+      {isUploading && (
+        <div className="absolute bottom-5 w-[300px] right-5 bg-white shadow-xl rounded-lg ">
+          <div className="border-b flex justify-between border-neutral-100 px-4 py-1">
+            <p className="text-sm">Uploading...</p>
+            <IconPlus
+              onClick={() => {
+                controller.abort();
+                setIsUploading(false);
+              }}
+              size={18}
+              className="rotate-45 cursor-pointer"
+            />
           </div>
-          <div className="w-[30px] h-[30px] relative">
-            <LoadingProgressBar progressPercentage={uploadProgress} />
+          <div className="flex justify-between items-center p-3">
+            <div className="flex gap-1 mr-10">
+              <IconFile />
+              {uploadFileName}
+            </div>
+            <div className="w-[30px] h-[30px] relative">
+              <LoadingProgressBar progressPercentage={uploadProgress} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

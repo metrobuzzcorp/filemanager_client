@@ -1,8 +1,20 @@
+import { useEffect, useMemo, useState } from "react";
+
 export const LoadingProgressBar = ({
   progressPercentage,
 }: {
   progressPercentage: number;
 }) => {
+  const percentageLoaded = useMemo(() => {
+    if (!progressPercentage) {
+      return "251.2";
+    }
+
+    return (251.2 - (progressPercentage * 251.2) / 100).toString();
+  }, [progressPercentage]);
+
+  console.log({ percentageLoaded, progressPercentage });
+
   return (
     <>
       <svg
@@ -26,7 +38,7 @@ export const LoadingProgressBar = ({
           stroke="#10b981"
           stroke-width="10"
           stroke-dasharray="251.2"
-          stroke-dashoffset="0"
+          stroke-dashoffset={percentageLoaded}
         ></circle>
         <text
           x="50"
