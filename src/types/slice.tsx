@@ -1,5 +1,7 @@
+import type { Controller } from "./general";
+
 export type User = {
-  email: string;
+  emailAddress: string;
   token: string;
   createdAt: string;
   updatedAt: string;
@@ -8,4 +10,8 @@ export type User = {
 
 export type UserSlice = {
   user: User;
+};
+
+export type EntitySlice = {
+  listType: Controller;
 };

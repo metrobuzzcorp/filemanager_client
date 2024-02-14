@@ -27,19 +27,20 @@ export type LoginUserResponse = DefaultResponseObject<{
 
 export type LoginUserRequest = RegisterUserRequest;
 
-type Entity = {
+export type Entity = {
   id: string | null;
   name: string | null;
   type: "file" | "folder" | null;
   url: string | null;
   status: EntityStatus | null;
   parentId: string | null;
-  owner: LoginUserResponse["payload"] | null;
+  owner: Omit<LoginUserResponse["payload"], "token"> | null;
   cloudinaryPublicId: string | null;
   cloudinaryTag: string | null;
   cloudinaryFormat: string | null;
   cloudinaryFileName: string | null;
   fileType: "image" | "video" | null;
+  fileSize: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 };

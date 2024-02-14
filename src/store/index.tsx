@@ -1,5 +1,5 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { userReducer } from "./slices";
+import { userReducer, entityReducer } from "./slices";
 import {
   entityApiMiddleware,
   entityApiReducer,
@@ -9,8 +9,16 @@ import {
   userApiReducerPath,
 } from "./apis";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { persistReducer, persistStore } from "redux-persist";
-import thunk from "redux-thunk";
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+  persistReducer,
+  persistStore,
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 const storeGenerator = () => {
@@ -18,6 +26,7 @@ const storeGenerator = () => {
 
   const combinedReducers = combineReducers({
     userReducer,
+    entityReducer,
     [userApiReducerPath]: userApiReducer,
     [entityApiReducerPath]: entityApiReducer,
   });
@@ -36,7 +45,11 @@ const storeGenerator = () => {
     store = configureStore({
       reducer: persistedReducer,
       middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(userApiMiddleware, entityApiMiddleware),
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          },
+        }).concat(userApiMiddleware, entityApiMiddleware),
     });
 
     const persistor = persistStore(store);
@@ -47,7 +60,11 @@ const storeGenerator = () => {
   store = configureStore({
     reducer: combinedReducers,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(userApiMiddleware, entityApiMiddleware),
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
+      }).concat(userApiMiddleware, entityApiMiddleware),
   });
 
   const persistor = persistStore(store);
@@ -62,3 +79,6 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 setupListeners(store.dispatch);
+
+export * from "./apis";
+export * from "./hooks";
