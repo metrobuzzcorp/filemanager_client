@@ -1,5 +1,4 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
-import { Controller } from "./general";
 import { Entity } from "./api";
 
 export type DefaultInputProps = DetailedHTMLProps<
@@ -15,8 +14,19 @@ export type InputProps = {
   ref?: React.Ref<HTMLInputElement> | undefined;
 } & DefaultInputProps;
 
+type FolderBreadcrumbs = {
+  folderName: string;
+  folderId: string;
+};
+
 export type TopbarProps = {
   getSearchInput: (text: string) => void;
+  setFolderBreadcrumbs: React.Dispatch<
+    React.SetStateAction<FolderBreadcrumbs[]>
+  >;
+  folderBreadcrumbs: FolderBreadcrumbs[];
+  setCurrentFolderId: React.Dispatch<React.SetStateAction<string>>;
+  currentFolderId: string;
 };
 
 export type EntityProps = {

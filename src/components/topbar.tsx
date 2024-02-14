@@ -7,7 +7,13 @@ import { useSearchParams } from "next/navigation";
 import { normalCaseGenerator } from "normal-case-generator";
 import { useMemo, useState } from "react";
 
-export const Topbar = ({ getSearchInput }: TopbarProps) => {
+export const Topbar = ({
+  getSearchInput,
+  currentFolderId,
+  folderBreadcrumbs,
+  setCurrentFolderId,
+  setFolderBreadcrumbs,
+}: TopbarProps) => {
   const urlSearchParams = useSearchParams();
 
   const activeTab = urlSearchParams.get("activeTab") as ActiveTab | null;
@@ -36,9 +42,37 @@ export const Topbar = ({ getSearchInput }: TopbarProps) => {
 
   const dispatch = useAppDispatch();
 
+  const updateBreadcrumbs = (breadcrumb: (typeof folderBreadcrumbs)[0]) => {
+    // setCurrentFolderId(breadcrumb.folderId);
+    if (currentFolderId !== breadcrumb.folderId) {
+      setFolderBreadcrumbs(
+        folderBreadcrumbs.filter(
+          (predicate) => predicate.folderId !== breadcrumb.folderId
+        )
+      );
+    }
+
+    setCurrentFolderId(breadcrumb.folderId);
+  };
+
   return (
     <div className="flex flex-wrap items-center justify-between border-neutral-100 border-b pb-0 pt-5 lg:py-5 px-5">
       <div className="flex gap-12 items-center w-full lg:w-6/12">
+        <>
+          {folderBreadcrumbs && folderBreadcrumbs.length > 0 ? (
+            <div className="flex">
+              {folderBreadcrumbs.map((breadcrumb, index) => {
+                return (
+                  <p key={index} onClick={() => updateBreadcrumbs(breadcrumb)}>
+                    {breadcrumb.folderName}
+                  </p>
+                );
+              })}
+            </div>
+          ) : (
+            <></>
+          )}
+        </>
         <h1 className="text-xl text-neutral-500">
           {normalCaseGenerator(currentActiveTab)}
         </h1>

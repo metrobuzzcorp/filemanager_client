@@ -1,8 +1,13 @@
 import { EntityCardItem, LoadingProgressBar, Topbar } from "@/components";
-import { useAppSelector, useLazyGetRootFolderDetailsQuery } from "@/store";
+import {
+  useAppSelector,
+  useLazyGetFolderContentsQuery,
+  useLazyGetRootFolderDetailsQuery,
+} from "@/store";
 import {
   CreateFileResponse,
   Entity,
+  GetFolderContentsRequest,
   GetRootFolderDetailsRequest,
   GetRootFolderDetailsResponse,
 } from "@/types";
@@ -13,7 +18,7 @@ import { endpointBuilder } from "@/utils";
 import { config } from "@/config";
 import { toast } from "react-toastify";
 import { IconFile, IconPlus } from "@tabler/icons-react";
-import { FileDetails } from "../components";
+import { FileDetails, GridStyle } from "../components";
 import { ListStyle } from "../components";
 
 export const Home = () => {
@@ -49,6 +54,8 @@ export const Home = () => {
     url: "",
   });
 
+  const [content, setContent] = useState<Entity[]>([]);
+
   const [currentFolderId, setCurrentFolderId] = useState("");
   const [currentFileId, setCurrentFileId] = useState("");
 
@@ -62,6 +69,7 @@ export const Home = () => {
       triggerFetch({ ownerId: getRootData?.ownerId as string }).unwrap(),
     onSuccess: (data) => {
       setEntity(data.payload);
+      setContent(data.payload.content);
       setCurrentFolderId(data.payload.id as string);
     },
     onError(error) {
@@ -174,6 +182,42 @@ export const Home = () => {
     uploadFile(files[0]);
   };
 
+  const [getFolderContents] = useLazyGetFolderContentsQuery();
+
+  const { isLoading: isFetchingFolderContents, trigger: fetchFolderContents } =
+    useFetcher<GetFolderContentsRequest>({
+      queryFn: (queryFolderContentsData) =>
+        getFolderContents({
+          folderId: queryFolderContentsData?.folderId as string,
+        }).unwrap(),
+      onSuccess(data) {
+        if (!data.status) {
+          throw new Error(data.message);
+        }
+
+        setContent(data.payload);
+      },
+      onError(error) {},
+      onFinal() {},
+    });
+
+  useEffect(() => {
+    if (currentFolderId) {
+      fetchFolderContents({
+        folderId: currentFolderId,
+      });
+    }
+  }, [currentFolderId]);
+
+  const [folderBreadcrumbs, setFolderBreadcrumbs] = useState<
+    {
+      folderName: string;
+      folderId: string;
+    }[]
+  >([]);
+
+  const updateBreadcrumbs = () => {};
+
   return (
     <div className="flex relative flex-auto gap-5">
       <div
@@ -185,22 +229,30 @@ export const Home = () => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <Topbar getSearchInput={(text) => setSearchInput(text)} />
+        <Topbar
+          getSearchInput={(text) => setSearchInput(text)}
+          setFolderBreadcrumbs={setFolderBreadcrumbs}
+          folderBreadcrumbs={folderBreadcrumbs}
+          setCurrentFolderId={setCurrentFolderId}
+          currentFolderId={currentFolderId}
+        />
         <div className="overflow-y-auto h-4 scrollbar:!w-1.5 scrollbar:!h-1.5 scrollbar-track:!bg-slate-100 scrollbar-thumb:!rounded scrollbar-thumb:!bg-slate-300 overscroll-contain flex-auto py-5 px-5">
-          {entity.content && entity.content.length > 0 ? (
+          {content && content.length > 0 ? (
             <>
               {listType === "card" && (
                 <GridStyle
-                  entities={entity.content.filter((_) =>
+                  entities={content.filter((_) =>
                     _.name?.toLowerCase().includes(searchInput.toLowerCase())
                   )}
-                  setCurrentFolderId={setCurrentFolderId}
+                  setCurrentFolderId={(folderId) => {
+                    setCurrentFolderId(folderId);
+                  }}
                   setCurrentFileId={setCurrentFileId}
                 />
               )}
               {listType === "list" && (
                 <ListStyle
-                  entities={entity.content.filter((_) =>
+                  entities={content.filter((_) =>
                     _.name?.toLowerCase().includes(searchInput.toLowerCase())
                   )}
                   setCurrentFolderId={setCurrentFolderId}
@@ -255,73 +307,6 @@ export const Home = () => {
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-const GridStyle = ({
-  entities,
-  setCurrentFolderId,
-  setCurrentFileId,
-}: {
-  entities: Entity[];
-  setCurrentFolderId: React.Dispatch<React.SetStateAction<string>>;
-  setCurrentFileId: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-  return (
-    <div>
-      <p className="font-bold text-sm text-neutral-500">Folders</p>
-      <div className="w-full mt-3 flex flex-wrap justify-between">
-        {entities.filter((_) => _.type === "folder").length > 0 ? (
-          <>
-            {entities
-              .filter((_) => _.type === "folder")
-              .map((singleEntity, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`lg:w-[24%] mb-5`}
-                    onClick={() =>
-                      singleEntity.type === "folder"
-                        ? setCurrentFolderId(singleEntity.id as string)
-                        : setCurrentFileId(singleEntity.id as string)
-                    }
-                  >
-                    <EntityCardItem entity={singleEntity} />
-                  </div>
-                );
-              })}
-          </>
-        ) : (
-          <p className="text-neutral-500 mb-5">Currently no folders to show!</p>
-        )}
-      </div>
-      <p className="font-bold text-sm text-neutral-500">Files</p>
-      <div className="w-full mt-3 flex flex-wrap justify-between">
-        {entities.filter((_) => _.type === "file").length > 0 ? (
-          <>
-            {entities
-              .filter((_) => _.type === "file")
-              .map((singleEntity, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`lg:w-[24%] mb-5`}
-                    onClick={() =>
-                      singleEntity.type === "folder"
-                        ? setCurrentFolderId(singleEntity.id as string)
-                        : setCurrentFileId(singleEntity.id as string)
-                    }
-                  >
-                    <EntityCardItem entity={singleEntity} />
-                  </div>
-                );
-              })}
-          </>
-        ) : (
-          <p className="text-neutral-500 mb-5">Currently no files to show!</p>
-        )}
-      </div>
     </div>
   );
 };
