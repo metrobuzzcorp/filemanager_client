@@ -14,12 +14,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <html lang="en">
-          <body className={inter.className}>{children}</body>
-        </html>
-      </PersistGate>
-    </Provider>
+    <html lang="en">
+      <body className={inter.className}>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            {children}
+          </PersistGate>
+        </Provider>
+      </body>
+    </html>
   );
 }
